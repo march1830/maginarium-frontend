@@ -87,7 +87,7 @@ function onJoin() {
           type="text"
           placeholder="ABCD"
           autocapitalize="characters"
-          inputmode="latin"
+          inputmode="text"
           @keyup.enter="onJoin"
         />
         <button class="cta primary" :disabled="!canJoin" @click="onJoin">Join</button>
