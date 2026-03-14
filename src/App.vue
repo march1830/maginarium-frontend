@@ -3,27 +3,76 @@
     <header class="header">
       <img alt="Maginarium" src="/favicon.svg" class="logo" />
       <h1>Maginarium</h1>
-      <p class="tagline">Vue 3 + Vite starter, ready for Vercel</p>
+      <p class="tagline">Start a new game or join an existing room</p>
     </header>
 
-    <HelloMaginarium msg="Welcome to Maginarium" />
+    <StartFlow v-if="view === 'start'" @create="onCreate" @join="onJoin" />
 
-    <section class="links">
-      <a href="https://vuejs.org/guide/introduction.html" target="_blank" rel="noreferrer">Vue Docs</a>
-      <a href="https://vitejs.dev/guide/" target="_blank" rel="noreferrer">Vite Guide</a>
-      <a href="https://vercel.com/docs" target="_blank" rel="noreferrer">Vercel Docs</a>
-    </section>
+    <RoomLobby
+      v-else
+      :room-code="roomCode"
+      :players="players"
+      :me="me"
+      @startGame="onStartGame"
+      @leave="onLeaveRoom"
+    />
   </main>
 </template>
 
 <script setup lang="ts">
-import HelloMaginarium from './components/HelloMaginarium.vue'
+import { ref } from 'vue'
+import StartFlow from './components/StartFlow.vue'
+import RoomLobby from './components/RoomLobby.vue'
+
+type View = 'start' | 'lobby'
+const view = ref<View>('start')
+
+// Demo state (will be replaced by real backend integration later)
+const roomCode = ref('ABCD')
+const me = ref<string>('')
+const players = ref<Array<{ name: string; isAdmin?: boolean }>>([])
+
+function onCreate(payload: { name: string }) {
+  me.value = payload.name
+  roomCode.value = 'NEW1'
+  players.value = [
+    { name: payload.name, isAdmin: true },
+    { name: 'Jamie' },
+    { name: 'Riley' }
+  ]
+  view.value = 'lobby'
+}
+
+function onJoin(payload: { name: string; roomCode: string }) {
+  me.value = payload.name
+  roomCode.value = payload.roomCode
+  players.value = [
+    { name: 'Alex', isAdmin: true },
+    { name: payload.name },
+    { name: 'Sam' }
+  ]
+  view.value = 'lobby'
+}
+
+function onStartGame() {
+  // Placeholder action; replace with navigation to game screen later
+  console.log('Starting game for room', roomCode.value)
+  alert(`Starting game in room ${roomCode.value}! (demo)`) // eslint-disable-line no-alert
+}
+
+function onLeaveRoom() {
+  // Clear demo state when leaving
+  me.value = ''
+  players.value = []
+  roomCode.value = 'ABCD'
+  view.value = 'start'
+}
 </script>
 
 <style scoped>
 .container {
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto 1fr;
   gap: 2rem;
   min-height: 100vh;
   place-items: center;
@@ -37,12 +86,5 @@ import HelloMaginarium from './components/HelloMaginarium.vue'
 }
 .tagline {
   color: #64748b;
-}
-.links {
-  display: flex;
-  gap: 1rem;
-}
-.links a {
-  color: #42b883;
 }
 </style>
